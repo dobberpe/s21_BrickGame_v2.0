@@ -61,6 +61,7 @@ void init_tetris(tetris_t *tetris_info) {
     for (int j = 0; j < FIELD_COLS; ++j) tetris_info->field[i][j] = EMPTY;
   }
   tetris_info->next_figure = init_figure();
+  for (int i = 0; i < 4; ++i) tetris_info->filled_lines[i] = -1;
   tetris_info->timer = 0;
   tetris_info->pause = true;
   tetris_info->state = START;
@@ -259,6 +260,7 @@ void remove_line(tetris_t *tetris_info) {
     tetris_info->game_info.level = tetris_info->game_info.score / 600 + 1;
     tetris_info->game_info.speed = tetris_info->game_info.score / 600 + 1;
   }
+  tetris_info->state = SPAWN;
 }
 
 void gameover(tetris_t *tetris_info) {}
