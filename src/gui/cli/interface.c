@@ -8,16 +8,8 @@ int main() {
   print_display(game_window);
   update_display(game_window, &game_info);
   while (action != Terminate) {
-    if (!game_info.pause) {
-      game_info = updateCurrentState();
-      debug_log("back in cycle");
-      for (int i = 0; i < FIELD_ROWS; i++) for (int j = 0; j < FIELD_COLS; j++) {
-          char buffer[100];
-      	  sprintf(buffer, "%d", game_info.field[i][j]);
-      	  debug_log(buffer);
-      }
-      update_display(game_window, &game_info);
-    }
+    game_info = updateCurrentState();
+    if (!game_info.pause) update_display(game_window, &game_info);
     if (get_user_input(game_window, &action, game_info.pause)) userInput(action, false);
   }
   game_info = updateCurrentState(); // очистка
@@ -139,7 +131,6 @@ void print_pause(WINDOW *brick_game_window, bool pause) {
 }
 
 void update_display(WINDOW *brick_game_window, GameInfo_t *game_info) {
-  debug_log("update display");
   reset_info(brick_game_window);
   printf_info(brick_game_window, game_info);
   print_field(brick_game_window, game_info->field);
@@ -191,14 +182,14 @@ bool get_user_input(WINDOW *game_window, UserAction_t *user_action, bool pause) 
   bool pressed = true;
   int c = wgetch(game_window);
 
-  if (c == ' ' && pause) *user_action = Start;
-  else if (c == ' ' && !pause) *user_action = Pause;
+  if (c == '\n' && pause) *user_action = Start;
+  else if (c == '\n' && !pause) *user_action = Pause;
   else if (c == KEY_ESC) *user_action = Terminate;
   else if (c == KEY_LEFT) *user_action = Left;
   else if (c == KEY_RIGHT) *user_action = Right;
   else if (c == KEY_UP) *user_action = Up;
   else if (c == KEY_DOWN) *user_action = Down;
-  else if (c == KEY_ENTER) *user_action = Action;
+  else if (c == ' ') *user_action = Action;
   else pressed = false;
 
   return pressed;

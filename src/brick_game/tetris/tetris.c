@@ -6,28 +6,24 @@ void userInput(UserAction_t action, bool hold) {
   debug_log("userInput");
 
   if (action == Start) {
-    debug_log("action Start");
     tetris_info->game_info.pause = false;
-    if (tetris_info->state == START) {
-      tetris_info->state = SPAWN;
-      debug_log("state to spawn");
-    }
+    if (tetris_info->state == START) tetris_info->signal = ENTER;
   } else if (action == Pause) tetris_info->game_info.pause = true;
   else if (action == Terminate) tetris_info->signal = ESCAPE;
   else if (tetris_info->state == MOVING) {
     tetris_info->signal = action - 2;
   }
+
+  process_signal(tetris_info);
+  tetris_info->signal = NOSIG;
 }
 
 GameInfo_t updateCurrentState() {
-
-  debug_log("updateCurrentState");
-
   tetris_t *tetris_info = get_tetris_info();
   process_signal(tetris_info);
   tetris_info->signal = NOSIG;
   if (tetris_info->state != EXIT) update_game_info(tetris_info, tetris_info->next_figure.type);
-  debug_log("update current state DONE");
+
   return tetris_info->game_info;
 }
 
@@ -36,18 +32,12 @@ tetris_t *get_tetris_info() {
       .timer = -1,
   };
 
-  if (tetris_info.timer == -1) {
-    init_tetris(&tetris_info);
-    debug_log("create tetris_info");
-  } else debug_log("already created tetris_info");
+  if (tetris_info.timer == -1) init_tetris(&tetris_info);
 
   return &tetris_info;
 }
 
 void update_game_info(tetris_t *tetris_info, type_t next_figure_type) {
-
-  debug_log("update_game_info");
-
   for (int i = 0; i < FIELD_ROWS; ++i)
     for (int j = 0; j < FIELD_COLS; ++j)
       tetris_info->game_info.field[i][j] = (int)(tetris_info->field[i][j] != EMPTY);
@@ -101,7 +91,6 @@ GameInfo_t init_game_info() {
 }
 
 figure_t init_figure() {
-  debug_log("init figure");
   figure_t figure;
   figure.type = rand() % 7;
 
@@ -155,9 +144,6 @@ figure_t init_figure() {
 }
 
 void process_signal(tetris_t *tetris_info) {
-
-  debug_log("process signal");
-
   action fsm_table[8][7] = {
     {exitstate, NULL, NULL, NULL, NULL, spawn, NULL},
     {spawn, spawn, spawn, spawn, spawn, spawn, spawn},
@@ -247,7 +233,11 @@ void check_timer(tetris_t *tetris_info) {
 }
 
 void falling(tetris_t *tetris_info) {
-  tetris_info->state = fall(tetris_info->field, &(tetris_info->figure)) ? ATTACHING : MOVING;
+  if (fall(tetris_info->field, &(tetris_info->figure))) tetris_info->state = ATTACHING;
+  else {
+    update_field(tetris_info->field, tetris_info->figure, TMP);
+    tetris_info->state = MOVING;
+  }
 }
 
 void attaching(tetris_t *tetris_info) {
@@ -296,7 +286,6 @@ void exitstate(tetris_t *tetris_info) {
 }
 
 long long get_time_ms() {
-  debug_log("get time ms");
   struct timeval tv;
   gettimeofday(&tv, NULL);
   return (long long)tv.tv_sec * 1000 + tv.tv_usec / 1000;
