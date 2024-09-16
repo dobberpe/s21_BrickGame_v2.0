@@ -1,15 +1,17 @@
 #include "tetris.h"
 
 void userInput(UserAction_t action, bool hold) {
-  tetris_t *tetris_info = get_tetris_info();
+  (void)hold;
 
-  debug_log("userInput");
+  tetris_t *tetris_info = get_tetris_info();
 
   if (action == Start) {
     tetris_info->game_info.pause = false;
     if (tetris_info->state == START) tetris_info->signal = ENTER;
-  } else if (action == Pause) tetris_info->game_info.pause = true;
-  else if (action == Terminate) tetris_info->signal = ESCAPE;
+  } else if (action == Pause)
+    tetris_info->game_info.pause = true;
+  else if (action == Terminate)
+    tetris_info->signal = ESCAPE;
   else if (tetris_info->state == MOVING) {
     tetris_info->signal = action - 2;
   }
@@ -22,7 +24,8 @@ GameInfo_t updateCurrentState() {
   tetris_t *tetris_info = get_tetris_info();
   process_signal(tetris_info);
   tetris_info->signal = NOSIG;
-  if (tetris_info->state != EXIT) update_game_info(tetris_info, tetris_info->next_figure.type);
+  if (tetris_info->state != EXIT)
+    update_game_info(tetris_info, tetris_info->next_figure.type);
 
   return tetris_info->game_info;
 }
@@ -40,30 +43,33 @@ tetris_t *get_tetris_info() {
 void update_game_info(tetris_t *tetris_info, type_t next_figure_type) {
   for (int i = 0; i < FIELD_ROWS; ++i)
     for (int j = 0; j < FIELD_COLS; ++j)
-      tetris_info->game_info.field[i][j] = (int)(tetris_info->field[i][j] != EMPTY);
+      tetris_info->game_info.field[i][j] =
+          (int)(tetris_info->field[i][j] != EMPTY);
 
   tetris_info->game_info.next[0][0] =
       next_figure_type != L && next_figure_type != O && next_figure_type != S;
   tetris_info->game_info.next[0][1] = true;
   tetris_info->game_info.next[0][2] = next_figure_type != Z;
-  tetris_info->game_info.next[0][3] = next_figure_type == I || next_figure_type == L;
+  tetris_info->game_info.next[0][3] =
+      next_figure_type == I || next_figure_type == L;
   tetris_info->game_info.next[1][0] = next_figure_type == S;
-  tetris_info->game_info.next[1][1] = next_figure_type != I && next_figure_type != J;
+  tetris_info->game_info.next[1][1] =
+      next_figure_type != I && next_figure_type != J;
   tetris_info->game_info.next[1][2] =
       next_figure_type == J || next_figure_type == O || next_figure_type == Z;
 }
 
 void init_tetris(tetris_t *tetris_info) {
+  srand(time(NULL));
   tetris_info->game_info = init_game_info();
-  tetris_info->field = (field_t**)malloc(sizeof(field_t*) * FIELD_ROWS);
+  tetris_info->field = (field_t **)malloc(sizeof(field_t *) * FIELD_ROWS);
   for (int i = 0; i < FIELD_ROWS; ++i) {
-    tetris_info->field[i] = (field_t*)malloc(sizeof(field_t) * FIELD_COLS);
+    tetris_info->field[i] = (field_t *)malloc(sizeof(field_t) * FIELD_COLS);
     for (int j = 0; j < FIELD_COLS; ++j) tetris_info->field[i][j] = EMPTY;
   }
-  tetris_info->next_figure = init_figure();
+  tetris_info->next_figure = init_figure(rand() % 7);
   for (int i = 0; i < 4; ++i) tetris_info->filled_lines[i] = -1;
   tetris_info->timer = 0;
-  tetris_info->pause = true;
   tetris_info->state = START;
   tetris_info->signal = NOSIG;
 }
@@ -71,73 +77,67 @@ void init_tetris(tetris_t *tetris_info) {
 GameInfo_t init_game_info() {
   GameInfo_t game_info;
 
-  game_info.field = (int**)malloc(FIELD_ROWS * sizeof(int*));
+  game_info.field = (int **)malloc(FIELD_ROWS * sizeof(int *));
   for (int i = 0; i < FIELD_ROWS; ++i) {
-    game_info.field[i] = (int*)malloc(FIELD_COLS * sizeof(int));
+    game_info.field[i] = (int *)malloc(FIELD_COLS * sizeof(int));
     for (int j = 0; j < FIELD_COLS; ++j) game_info.field[i][j] = 0;
   }
 
-  game_info.next = (int**)malloc(NEXT_ROWS * sizeof(int*));
+  game_info.next = (int **)malloc(NEXT_ROWS * sizeof(int *));
   for (int i = 0; i < NEXT_ROWS; ++i) {
-    game_info.next[i] = (int*)malloc(NEXT_COLS * sizeof(int));
+    game_info.next[i] = (int *)malloc(NEXT_COLS * sizeof(int));
     for (int j = 0; j < NEXT_COLS; ++j) game_info.next[i][j] = 0;
   }
 
   game_info.score = 0;
   game_info.high_score = 0;
+  read_highscore("build/tetris.score", &(game_info.high_score));
   game_info.level = 1;
   game_info.speed = 1;
   game_info.pause = 1;
   return game_info;
 }
 
-figure_t init_figure() {
+void read_highscore(char *filename, int *highscore) {
+  FILE *file = fopen(filename, "rb");
+  if (file) {
+    fread(highscore, sizeof(int), 1, file);
+    fclose(file);
+  }
+}
+
+void write_highscore(char *filename, int *highscore) {
+  FILE *file = fopen(filename, "wb");
+  if (file) {
+    fwrite(highscore, sizeof(int), 1, file);
+    fclose(file);
+  }
+}
+
+figure_t init_figure(type_t type) {
   figure_t figure;
-  figure.type = rand() % 7;
+  figure.type = type;
 
   for (int i = 0; i < 4; ++i) {
     figure.coords[i].x = 0;
     figure.coords[i].y = 0;
   }
-  figure.coords[0].x = figure.type == I   ? I_0_X
-                       : figure.type == J ? J_0_X
-                       : figure.type == L ? L_0_X
-                       : figure.type == O ? O_0_X
-                       : figure.type == S ? S_0_X
-                       : figure.type == Z ? Z_0_X
-                                   : T_0_X;
-  figure.coords[1].x = figure.type == I   ? I_1_X
-                       : figure.type == J ? J_1_X
-                       : figure.type == L ? L_1_X
-                       : figure.type == O ? O_1_X
-                       : figure.type == S ? S_1_X
-                       : figure.type == Z ? Z_1_X
-                                   : T_1_X;
-  figure.coords[2].x = figure.type == I   ? I_2_X
-                       : figure.type == J ? J_2_X
-                       : figure.type == L ? L_2_X
-                       : figure.type == O ? O_2_X
-                       : figure.type == S ? S_2_X
-                       : figure.type == Z ? Z_2_X
-                                   : T_2_X;
-  figure.coords[2].y = figure.type == O   ? O_2_Y
-                       : figure.type == S ? S_2_Y
-                       : figure.type == Z ? Z_2_Y
-                                   : figure.coords[2].y;
-  figure.coords[3].x = figure.type == I   ? I_3_X
-                       : figure.type == J ? J_3_X
-                       : figure.type == L ? L_3_X
-                       : figure.type == O ? O_3_X
-                       : figure.type == S ? S_3_X
-                       : figure.type == Z ? Z_3_X
-                                   : T_3_X;
-  figure.coords[3].y = figure.type == J   ? J_3_Y
-                       : figure.type == L ? L_3_Y
-                       : figure.type == O ? O_3_Y
-                       : figure.type == S ? S_3_Y
-                       : figure.type == Z ? Z_3_Y
-                       : figure.type == T ? T_3_Y
-                                   : figure.coords[3].y;
+  figure.coords[0].x =
+      figure.type == L || figure.type == O || figure.type == S ? 4 : 3;
+  figure.coords[1].x =
+      figure.type == L || figure.type == O || figure.type == S ? 5 : 4;
+  figure.coords[2].x = figure.type == L                       ? L_2_X
+                       : figure.type == S                     ? S_2_X
+                       : figure.type == O || figure.type == Z ? 4
+                                                              : 5;
+  figure.coords[2].y = figure.type == O || figure.type == S || figure.type == Z
+                           ? 1
+                           : figure.coords[2].y;
+  figure.coords[3].x =
+      figure.type == I                                           ? I_3_X
+      : figure.type == J || figure.type == O || figure.type == Z ? 5
+                                                                 : 4;
+  figure.coords[3].y = figure.type == I ? figure.coords[3].y : 1;
 
   figure.rotation = normal;
 
@@ -146,15 +146,17 @@ figure_t init_figure() {
 
 void process_signal(tetris_t *tetris_info) {
   action fsm_table[8][7] = {
-    {exitstate, NULL, NULL, NULL, NULL, spawn, NULL},
-    {spawn, spawn, spawn, spawn, spawn, spawn, spawn},
-    {exitstate, moveleft, moveright, put_down, movedown, rotate, check_timer},
-    {falling, falling, falling, falling, falling, falling, falling},
-    {attaching, attaching, attaching, attaching, attaching, attaching, attaching},
-    {remove_line, remove_line, remove_line, remove_line, remove_line, remove_line, remove_line},
-    {gameover, gameover, gameover, gameover, gameover, gameover, gameover},
-    {exitstate, exitstate, exitstate, exitstate, exitstate, exitstate, exitstate}
-  };
+      {exitstate, NULL, NULL, NULL, NULL, spawn, NULL},
+      {spawn, spawn, spawn, spawn, spawn, spawn, spawn},
+      {exitstate, moveleft, moveright, put_down, movedown, rotate, check_timer},
+      {falling, falling, falling, falling, falling, falling, falling},
+      {attaching, attaching, attaching, attaching, attaching, attaching,
+       attaching},
+      {remove_line, remove_line, remove_line, remove_line, remove_line,
+       remove_line, remove_line},
+      {exitstate, gameover, gameover, gameover, gameover, gameover, gameover},
+      {exitstate, exitstate, exitstate, exitstate, exitstate, exitstate,
+       exitstate}};
 
   action act = fsm_table[tetris_info->state][tetris_info->signal];
 
@@ -162,13 +164,11 @@ void process_signal(tetris_t *tetris_info) {
 }
 
 void spawn(tetris_t *tetris_info) {
-  debug_log("spawn");
   copy_figure(tetris_info->next_figure, &(tetris_info->figure));
-  tetris_info->next_figure = init_figure();
+  tetris_info->next_figure = init_figure(rand() % 7);
   tetris_info->timer = get_time_ms();
   update_field(tetris_info->field, tetris_info->figure, TMP);
   tetris_info->state = MOVING;
-  debug_log("state to moving");
 }
 
 void moveleft(tetris_t *tetris_info) {
@@ -218,7 +218,8 @@ void rotate(tetris_t *tetris_info) {
   while (--right_pos >= 9) move_figure(tetris_info->field, &rotated, Left);
 
   if (check_intersection(
-          tetris_info->field, rotated)) {  // проверка на пересечение с постоянными фигурами
+          tetris_info->field,
+          rotated)) {  // проверка на пересечение с постоянными фигурами
     for (int i = 0; i < 4; ++i) {
       tetris_info->figure.coords[i].x = rotated.coords[i].x;
       tetris_info->figure.coords[i].y = rotated.coords[i].y;
@@ -230,11 +231,13 @@ void rotate(tetris_t *tetris_info) {
 }
 
 void check_timer(tetris_t *tetris_info) {
-  if (timer(&(tetris_info->timer), get_time_ms(), FALL_DELAY)) tetris_info->state = FALLING;
+  if (timer(&(tetris_info->timer), get_time_ms(), FALL_DELAY))
+    tetris_info->state = FALLING;
 }
 
 void falling(tetris_t *tetris_info) {
-  if (fall(tetris_info->field, &(tetris_info->figure))) tetris_info->state = ATTACHING;
+  if (fall(tetris_info->field, &(tetris_info->figure)))
+    tetris_info->state = ATTACHING;
   else {
     update_field(tetris_info->field, tetris_info->figure, TMP);
     tetris_info->state = MOVING;
@@ -243,7 +246,10 @@ void falling(tetris_t *tetris_info) {
 
 void attaching(tetris_t *tetris_info) {
   update_field(tetris_info->field, tetris_info->figure, CONST);
-  tetris_info->state = check_loss(tetris_info->field) ? GAMEOVER : full_lines(tetris_info->field, tetris_info->filled_lines) ? REMOVING : SPAWN;
+  tetris_info->state =
+      check_loss(tetris_info->field)                              ? GAMEOVER
+      : full_lines(tetris_info->field, tetris_info->filled_lines) ? REMOVING
+                                                                  : SPAWN;
 }
 
 void remove_line(tetris_t *tetris_info) {
@@ -252,10 +258,10 @@ void remove_line(tetris_t *tetris_info) {
     replace_line(tetris_info->field, tetris_info->filled_lines[line_counter]);
 
   tetris_info->game_info.score += line_counter == 1   ? 100
-                      : line_counter == 2 ? 300
-                      : line_counter == 3 ? 700
-                      : line_counter == 4 ? 1500
-                                          : 0;
+                                  : line_counter == 2 ? 300
+                                  : line_counter == 3 ? 700
+                                  : line_counter == 4 ? 1500
+                                                      : 0;
   if (tetris_info->game_info.score < 6000) {
     tetris_info->game_info.level = tetris_info->game_info.score / 600 + 1;
     tetris_info->game_info.speed = tetris_info->game_info.score / 600 + 1;
@@ -263,26 +269,31 @@ void remove_line(tetris_t *tetris_info) {
   tetris_info->state = SPAWN;
 }
 
-void gameover(tetris_t *tetris_info) {}
+void gameover(tetris_t *tetris_info) {
+  if (tetris_info->game_info.score > tetris_info->game_info.high_score) {
+    tetris_info->game_info.high_score = tetris_info->game_info.score;
+    write_highscore("build/tetris.score", &(tetris_info->game_info.high_score));
+  }
+}
 
 void exitstate(tetris_t *tetris_info) {
+  if (tetris_info->game_info.field) {
+    for (int i = 0; i < FIELD_ROWS; ++i) free(tetris_info->game_info.field[i]);
+    free(tetris_info->game_info.field);
+    tetris_info->game_info.field = NULL;
+  }
 
-  debug_log("exitstate");
+  if (tetris_info->game_info.next) {
+    for (int i = 0; i < NEXT_ROWS; ++i) free(tetris_info->game_info.next[i]);
+    free(tetris_info->game_info.next);
+    tetris_info->game_info.next = NULL;
+  }
 
-  for (int i = 0; i < FIELD_ROWS; ++i) free(tetris_info->game_info.field[i]);
-  free(tetris_info->game_info.field);
-
-  debug_log("field cleared");
-
-  for (int i = 0; i < NEXT_ROWS; ++i) free(tetris_info->game_info.next[i]);
-  free(tetris_info->game_info.next);
-
-  debug_log("next cleared");
-
-  for (int i = 0; i < FIELD_ROWS; ++i) free(tetris_info->field[i]);
-  free(tetris_info->field);
-
-  debug_log("tetris field cleared");
+  if (tetris_info->field) {
+    for (int i = 0; i < FIELD_ROWS; ++i) free(tetris_info->field[i]);
+    free(tetris_info->field);
+    tetris_info->field = NULL;
+  }
 
   tetris_info->state = EXIT;
 }
@@ -293,7 +304,7 @@ long long get_time_ms() {
   return (long long)tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
-bool timer(long long *prev_time, long long curr_time, int delay) { // unused
+bool timer(long long *prev_time, long long curr_time, int delay) {
   bool res = false;
   if (curr_time - *prev_time >= delay) {
     *prev_time = curr_time;
@@ -303,31 +314,18 @@ bool timer(long long *prev_time, long long curr_time, int delay) { // unused
 }
 
 void update_field(field_t **field, figure_t figure, field_t value) {
-  debug_log("update field");
   remove_temp(field);
   add_figure(field, figure, value);
-  debug_log("updated");
-//  char buffer[100];
-//  for (int i = 0; i < FIELD_ROWS; ++i) {
-//    for (int j = 0; j < FIELD_COLS; ++j) sprintf(buffer, "%d", field[i][j]);
-//    sprintf(buffer, "\n");
-//  }
-//  debug_log(buffer);
 }
 
 void remove_temp(field_t **field) {
-  debug_log("remove temp");
   for (int i = 0; i < FIELD_ROWS; ++i)
     for (int j = 0; j < FIELD_COLS; ++j) {
-//      char buffer[100];
-//      sprintf(buffer, "i j: %d %d", i, j);
-//      debug_log(buffer);
       field[i][j] = field[i][j] == TMP ? EMPTY : field[i][j];
     }
 }
 
 void add_figure(field_t **field, figure_t figure, field_t value) {
-  debug_log("add figure");
   for (int i = 0; i < 4; ++i)
     if (figure.coords[i].y >= 0)
       field[figure.coords[i].y][figure.coords[i].x] = value;
@@ -456,7 +454,6 @@ void rotate_t(figure_t *figure, figure_t *rotated) {
 }
 
 void copy_figure(figure_t src, figure_t *dst) {
-  debug_log("copy figure");
   dst->type = src.type;
   dst->coords[0].x = src.coords[0].x;
   dst->coords[0].y = src.coords[0].y;
@@ -550,10 +547,10 @@ void replace_line(field_t **field, int i) {
       field[k][l] = k == 0 ? EMPTY : field[k - 1][l];
 }
 
-void debug_log(const char *message) {
-  FILE *f = fopen("debug.log", "a");
-  if (f) {
-    fprintf(f, "%s\n", message);
-    fclose(f);
-  }
-}
+// void debug_log(const char *message) {
+//   FILE *f = fopen("debug.log", "a");
+//   if (f) {
+//     fprintf(f, "%s\n", message);
+//     fclose(f);
+//   }
+// }

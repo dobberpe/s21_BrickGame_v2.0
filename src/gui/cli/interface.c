@@ -10,9 +10,9 @@ int main() {
   while (action != Terminate) {
     game_info = updateCurrentState();
     if (!game_info.pause) update_display(game_window, &game_info);
-    if (get_user_input(game_window, &action, game_info.pause)) userInput(action, false);
+    if (get_user_input(game_window, &action, game_info.pause))
+      userInput(action, false);
   }
-  game_info = updateCurrentState(); // очистка
 
   end_ncurses(game_window);
 
@@ -60,27 +60,24 @@ void print_display(WINDOW *brick_game_window) {
   reset_info(brick_game_window);
   wattrset(brick_game_window, COLOR_PAIR(DEFAULT));
 
-  for (int i = 3; i <= 23; i += 5)
-    mvwprintw(brick_game_window, i, 44,
-              i == 3    ? "SCORE"
-              : i == 8  ? "LEVEL"
-              : i == 13 ? "SPEED"
-              : i == 18 ? "NEXT"
-                        : "SPEED UP");
+  mvwprintw(brick_game_window, 3, 44, "SCORE");
+  mvwprintw(brick_game_window, 4, 44, "HIGHSCORE");
+  mvwprintw(brick_game_window, 8, 44, "LEVEL");
+  mvwprintw(brick_game_window, 13, 44, "SPEED");
+  mvwprintw(brick_game_window, 18, 44, "NEXT");
+  mvwprintw(brick_game_window, 23, 44, "SPEED UP");
   mvwprintw(brick_game_window, 3, 63, "0");
   mvwprintw(brick_game_window, 8, 63, "0");
   mvwprintw(brick_game_window, 13, 63, "0");
   mvwprintw(brick_game_window, 23, 62, "0");
   mvwprintw(brick_game_window, 27, 44, "CONTROL:");
-  for (int i = 29; i < 36; ++i)
-    mvwprintw(brick_game_window, i, 47, "%s",
-              i == 29   ? "SPACE - START"
-              : i == 30 ? "SPACE - PAUSE"
-              : i == 31 ? ">     - RIGHT"
-              : i == 32 ? "<     - LEFT"
-              : i == 33 ? "v     - PUT DOWN"
-              : i == 34 ? "ENTER - ROTATE"
-                        : "ESC   - QUIT");
+  mvwprintw(brick_game_window, 29, 45, "SPACE - START / PAUSE");
+  mvwprintw(brick_game_window, 30, 45, "←     - LEFT");
+  mvwprintw(brick_game_window, 31, 45, "→     - RIGHT");
+  mvwprintw(brick_game_window, 32, 45, "↓     - MOVE DOWN");
+  mvwprintw(brick_game_window, 33, 45, "↑     - PUT DOWN");
+  mvwprintw(brick_game_window, 34, 45, "ENTER - ROTATE");
+  mvwprintw(brick_game_window, 35, 45, "ESC   - QUIT");
 
   wrefresh(brick_game_window);
 }
@@ -107,7 +104,8 @@ void print_box(WINDOW *brick_game_window) {
 
 void reset_info(WINDOW *brick_game_window) {
   wattrset(brick_game_window, COLOR_PAIR(UNACTIVE));
-  mvwprintw(brick_game_window, 3, 60, "0000");
+  mvwprintw(brick_game_window, 3, 58, "000000");
+  mvwprintw(brick_game_window, 4, 58, "000000");
   mvwprintw(brick_game_window, 8, 62, "00");
   mvwprintw(brick_game_window, 13, 62, "00");
   mvwprintw(brick_game_window, 23, 61, "00 %%");
@@ -139,17 +137,32 @@ void update_display(WINDOW *brick_game_window, GameInfo_t *game_info) {
 
 void printf_info(WINDOW *brick_game_window, GameInfo_t *game_info) {
   mvwprintw(brick_game_window, 3,
-            game_info->score / 1000  ? 60
-            : game_info->score / 100 ? 61
-            : game_info->score / 10  ? 62
-                                     : 63,
+            game_info->score / 100000  ? 58
+            : game_info->score / 10000 ? 59
+            : game_info->score / 1000  ? 60
+            : game_info->score / 100   ? 61
+            : game_info->score / 10    ? 62
+                                       : 63,
             "%d", game_info->score);
+  mvwprintw(brick_game_window, 4,
+            game_info->high_score / 100000  ? 58
+            : game_info->high_score / 10000 ? 59
+            : game_info->high_score / 1000  ? 60
+            : game_info->high_score / 100   ? 61
+            : game_info->high_score / 10    ? 62
+                                            : 63,
+            "%d", game_info->high_score);
   mvwprintw(brick_game_window, 8, game_info->level / 10 ? 62 : 63, "%d",
             game_info->level);
   mvwprintw(brick_game_window, 13, game_info->speed / 10 ? 62 : 63, "%d",
             game_info->speed);
-  int speed_frac = ((game_info->score % 600) * 100) / 600;
-  mvwprintw(brick_game_window, 23, speed_frac / 10 ? 61 : 62, "%d", speed_frac);
+  int speed_frac =
+      game_info->speed < 10 ? ((game_info->score % 600) * 100) / 600 : 100;
+  mvwprintw(brick_game_window, 23,
+            speed_frac == 100 ? 60
+            : speed_frac / 10 ? 61
+                              : 62,
+            "%d", speed_frac);
 
   for (int i = 0; i < NEXT_ROWS; ++i) {
     for (int j = 0; j < NEXT_COLS; ++j) {
@@ -175,50 +188,31 @@ void print_field(WINDOW *brick_game_window, int **field) {
   }
 }
 
-bool get_user_input(WINDOW *game_window, UserAction_t *user_action, bool pause) {
-
-//  debug_log("get user input");
-
+bool get_user_input(WINDOW *game_window, UserAction_t *user_action,
+                    bool pause) {
   bool pressed = true;
   int c = wgetch(game_window);
 
-  if (c == '\n' && pause) *user_action = Start;
-  else if (c == '\n' && !pause) *user_action = Pause;
-  else if (c == KEY_ESC) *user_action = Terminate;
-  else if (c == KEY_LEFT) *user_action = Left;
-  else if (c == KEY_RIGHT) *user_action = Right;
-  else if (c == KEY_UP) *user_action = Up;
-  else if (c == KEY_DOWN) *user_action = Down;
-  else if (c == ' ') *user_action = Action;
-  else pressed = false;
+  if (c == '\n' && pause)
+    *user_action = Start;
+  else if (c == '\n' && !pause)
+    *user_action = Pause;
+  else if (c == KEY_ESC)
+    *user_action = Terminate;
+  else if (c == KEY_LEFT)
+    *user_action = Left;
+  else if (c == KEY_RIGHT)
+    *user_action = Right;
+  else if (c == KEY_UP)
+    *user_action = Up;
+  else if (c == KEY_DOWN)
+    *user_action = Down;
+  else if (c == ' ')
+    *user_action = Action;
+  else
+    pressed = false;
 
   return pressed;
-}
-
-void print_result(WINDOW *brick_game_window, GameInfo_t *game_info) {
-  for (int i = 15; i < 27; ++i)
-    for (int j = 10; j < 33; ++j)
-      mvwprintw(brick_game_window, i, j,
-                j == 10 || j == 32 ? " " :
-                i == 15 || i == 23   ? j == 11   ? "╔"
-                                       : j == 31 ? "╗"
-                                                 : "═"
-                : i == 22 || i == 26 ? j == 11   ? "╚"
-                                       : j == 31 ? "╝"
-                                                 : "═"
-                : j == 11 || j == 31 ? "║"
-                                     : " ");
-
-  mvwprintw(brick_game_window, 16, 13, "╔═╗ ╔═╗ ╔═╦═╗ ╔═╗");
-  mvwprintw(brick_game_window, 17, 13, "║ ╗ ╠═╣ ║ ║ ║ ╠═");
-  mvwprintw(brick_game_window, 18, 13, "╚═╝ ╝ ╚ ╝   ╚ ╚═╝");
-  mvwprintw(brick_game_window, 19, 13, "╔═╗ ╗  ╔ ╔═╗ ╔═╗");
-  mvwprintw(brick_game_window, 20, 13, "║ ║ ╚╗╔╝ ╠═  ╠═╩╗");
-  mvwprintw(brick_game_window, 21, 13, "╚═╝  ╚╝  ╚═╝ ╝  ╚");
-  mvwprintw(brick_game_window, 24, 14, "YOUR SCORE %6d", game_info->score);
-  mvwprintw(brick_game_window, 25, 14, "HIGHSCORE  %6d",
-            max(game_info->high_score, game_info->score));
-  wrefresh(brick_game_window);
 }
 
 void end_ncurses(WINDOW *brick_game_window) {

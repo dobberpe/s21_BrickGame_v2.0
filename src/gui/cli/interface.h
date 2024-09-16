@@ -6,10 +6,11 @@
 #define UNACTIVE 2
 #define PAUSE 3
 
-#include <ncursesw/curses.h>
 #include <locale.h>
+#include <ncursesw/curses.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 #include "../../brick_game/library_specification.h"
 
 WINDOW *init_ncurses();
@@ -24,4 +25,4 @@ bool get_user_input(WINDOW *game_window, UserAction_t *user_action, bool pause);
 void print_result(WINDOW *brick_game_window, GameInfo_t *game_info);
 void end_ncurses(WINDOW *game_window);
 
-#endif //INTERFACE_H
+#endif  // INTERFACE_H

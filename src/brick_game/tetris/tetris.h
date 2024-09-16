@@ -45,15 +45,18 @@
 #define T_3_X 4
 #define T_3_Y 1
 
-#define FALL_DELAY                                         \
-  tetris_info->game_info.speed < 5 ? 1000 - (tetris_info->game_info.speed - 1) * 250 \
-                      : 200 - (tetris_info->game_info.speed - 5) * 25
+#define FALL_DELAY                                      \
+  tetris_info->game_info.speed < 5                      \
+      ? 1000 - (tetris_info->game_info.speed - 1) * 250 \
+      : 200 - (tetris_info->game_info.speed - 5) * 25
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
-#include "../library_specification.h"
+#include <time.h>
+
 #include "../../gui/cli/interface.h"
+#include "../library_specification.h"
 
 typedef enum { I, J, L, O, S, Z, T } type_t;
 
@@ -72,7 +75,16 @@ typedef struct {
 
 typedef enum { EMPTY, TMP, CONST } field_t;
 
-typedef enum { START, SPAWN, MOVING, FALLING, ATTACHING, REMOVING, GAMEOVER, EXIT } tetris_fsm_t;
+typedef enum {
+  START,
+  SPAWN,
+  MOVING,
+  FALLING,
+  ATTACHING,
+  REMOVING,
+  GAMEOVER,
+  EXIT
+} tetris_fsm_t;
 
 typedef enum { ESCAPE, LEFT, RIGHT, UP, DOWN, ENTER, NOSIG } tetris_signal_t;
 
@@ -83,7 +95,6 @@ typedef struct {
   figure_t next_figure;
   int filled_lines[4];
   long long timer;
-  bool pause;
   tetris_fsm_t state;
   tetris_signal_t signal;
 } tetris_t;
@@ -92,9 +103,12 @@ void tetris();
 tetris_t *get_tetris_info();
 void init_tetris(tetris_t *tetris_info);
 GameInfo_t init_game_info();
-figure_t init_figure();
+figure_t init_figure(type_t type);
 void process_signal(tetris_t *tetris_info);
 void update_game_info(tetris_t *tetris_info, type_t next_figure_type);
+
+void read_highscore(char *filename, int *highscore);
+void write_highscore(char *filename, int *highscore);
 
 typedef void (*action)(tetris_t *tetris_info);
 
@@ -132,4 +146,4 @@ bool check_loss(field_t **field);
 bool full_lines(field_t **field, int *lines);
 void replace_line(field_t **field, int i);
 
-#endif //TETRIS_H
+#endif  // TETRIS_H
