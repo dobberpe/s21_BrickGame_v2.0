@@ -64,7 +64,7 @@ format_check:
 leak_check:
 	@valgrind --tool=memcheck --leak-check=yes ./test
 
-clean:
+clean: uninstall
 	@rm -f $(TETRIS_LIB) test gcov* coverage.info *.gcda *.gcno tests/*.gcno brick_game/tetris/*.gcda brick_game/tetris/*.gcno
 	@rm -rf coverage_report
 	@rm -rf .clang-format
