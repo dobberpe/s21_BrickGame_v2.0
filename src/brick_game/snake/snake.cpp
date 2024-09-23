@@ -91,11 +91,7 @@ void Snake::set_pause(bool value) { game_info.pause = value; }
 
 snake_fsm_t Snake::get_state() const { return state; }
 
-void Snake::set_signal(snake_signal_t value)
-{
-	debug_log("signal " + to_string(value));
-	signal = value;
-}
+void Snake::set_signal(snake_signal_t value) { signal = value; }
 
 void Snake::process_signal() {
 	action fsm_matrix[7][7] = {
@@ -226,13 +222,5 @@ void Snake::write_highscore() const {
 	if (File) {
 		File.write(reinterpret_cast<const char*>(&(game_info.high_score)), sizeof(game_info.high_score));
 		File.close();
-	}
-}
-
-void Snake::debug_log(const string& message) {
-	ofstream file("debug.log", ios::app);
-	if (file.is_open()) {
-		file << message << endl;
-		file.close();
 	}
 }

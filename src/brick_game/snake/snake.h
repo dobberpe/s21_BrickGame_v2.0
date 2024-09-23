@@ -59,7 +59,6 @@ namespace s21 {
 		void process_signal();
 		void update_game_info();
 		GameInfo_t get_game_info() const;
-		static void debug_log(const string& message);
 	private:
 		static Snake *snake_ptr;
 		deque<Coordinate> snake_body;
