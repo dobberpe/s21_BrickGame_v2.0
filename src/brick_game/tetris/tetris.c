@@ -6,7 +6,7 @@ void userInput(UserAction_t action, bool hold) {
   tetris_t *tetris_info = get_tetris_info();
 
   if (action == Start) {
-    tetris_info->game_info.pause = false;
+    if (tetris_info->state != GAMEOVER) tetris_info->game_info.pause = false;
     if (tetris_info->state == START) tetris_info->signal = ENTER;
   } else if (action == Pause)
     tetris_info->game_info.pause = true;
@@ -17,13 +17,11 @@ void userInput(UserAction_t action, bool hold) {
   }
 
   process_signal(tetris_info);
-  tetris_info->signal = NOSIG;
 }
 
 GameInfo_t updateCurrentState() {
   tetris_t *tetris_info = get_tetris_info();
   process_signal(tetris_info);
-  tetris_info->signal = NOSIG;
   if (tetris_info->state != EXIT)
     update_game_info(tetris_info, tetris_info->next_figure.type);
 
@@ -90,20 +88,23 @@ GameInfo_t init_game_info() {
   }
 
   game_info.score = 0;
-  game_info.high_score = 0;
-  read_highscore("build/tetris.score", &(game_info.high_score));
+  game_info.high_score = read_highscore(HIGHSCORE_FILE);
   game_info.level = 1;
   game_info.speed = 1;
   game_info.pause = 1;
   return game_info;
 }
 
-void read_highscore(char *filename, int *highscore) {
+int read_highscore(char *filename) {
   FILE *file = fopen(filename, "rb");
+  int highscore = 0;
+
   if (file) {
-    fread(highscore, sizeof(int), 1, file);
+    fread(&highscore, sizeof(int), 1, file);
     fclose(file);
   }
+
+  return highscore;
 }
 
 void write_highscore(char *filename, int *highscore) {
@@ -161,6 +162,8 @@ void process_signal(tetris_t *tetris_info) {
   action act = fsm_table[tetris_info->state][tetris_info->signal];
 
   if (act) act(tetris_info);
+
+  tetris_info->signal = NOSIG;
 }
 
 void spawn(tetris_t *tetris_info) {
@@ -262,6 +265,9 @@ void remove_line(tetris_t *tetris_info) {
                                   : line_counter == 3 ? 700
                                   : line_counter == 4 ? 1500
                                                       : 0;
+
+  tetris_info->game_info.high_score = max(tetris_info->game_info.score, tetris_info->game_info.high_score);
+
   if (tetris_info->game_info.score < 6000) {
     tetris_info->game_info.level = tetris_info->game_info.score / 600 + 1;
     tetris_info->game_info.speed = tetris_info->game_info.score / 600 + 1;
@@ -270,10 +276,8 @@ void remove_line(tetris_t *tetris_info) {
 }
 
 void gameover(tetris_t *tetris_info) {
-  if (tetris_info->game_info.score > tetris_info->game_info.high_score) {
-    tetris_info->game_info.high_score = tetris_info->game_info.score;
-    write_highscore("build/tetris.score", &(tetris_info->game_info.high_score));
-  }
+  write_highscore(HIGHSCORE_FILE, &(tetris_info->game_info.high_score));
+  tetris_info->game_info.pause = true;
 }
 
 void exitstate(tetris_t *tetris_info) {

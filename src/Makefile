@@ -1,13 +1,24 @@
 CC = gcc
+CXX = g++
+
 CFLAGS = -Wall -Wextra -Werror -std=c11
+CXXFLAGS = -Wall -Wextra -Werror -std=c++17
 TFLAGS = -lcheck -lsubunit -lm
 GFLAGS = -fprofile-arcs -ftest-coverage
+
 TETRIS_SRC = brick_game/tetris/tetris.c
 TETRIS_OBJ = $(TETRIS_SRC:.c=.o)
 TETRIS_LIB = build/tetris.a
+
+SNAKE_SRC = brick_game/snake/snake.cpp
+SNAKE_OBJ = $(SNAKE_SRC:.cpp=.o)
+SNAKE_LIB = build/snake.a
+
 CLI_SRC = gui/cli/interface.c
 CLI_OBJ = $(CLI_SRC:.c=.o)
-EXEC = build/tetris_cli
+TETRIS_CLI = build/tetris_cli
+SNAKE_CLI = build/snake_cli
+
 DIST_NAME = brick_game.tar.gz
 TEST_SRC = $(wildcard ./tests/*.c)
 TEST_GCDA = $(TETRIS_SRC:.c=.gcda)
@@ -15,21 +26,36 @@ TEST_OBJ = $(TEST_SRC:.c=.o)
 
 all: run
 
-install: $(CLI_OBJ) $(TETRIS_LIB)
-	@$(CC) $(CFLAGS) $(CLI_OBJ) -o $(EXEC) -L. -l:$(TETRIS_LIB) -lm -lncursesw
-	@rm -f $(CLI_OBJ)
+install: tetris_cli snake_cli
 
 uninstall:
-	@rm -rf $(EXEC)
+	@rm -rf $(TETRIS_CLI) $(SNAKE_CLI)
 
 %.o: %.c
 	@$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: %.cpp
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(TETRIS_LIB): $(TETRIS_OBJ)
 	@mkdir -p build
 	@ar rcs $(TETRIS_LIB) $(TETRIS_OBJ)
 	@ranlib $(TETRIS_LIB)
 	@rm -f $(TETRIS_OBJ)
+
+$(SNAKE_LIB): $(SNAKE_OBJ)
+	@mkdir -p build
+	@ar rcs $(SNAKE_LIB) $(SNAKE_OBJ)
+	@ranlib $(SNAKE_LIB)
+	@rm -f $(SNAKE_OBJ)
+
+tetris_cli: $(TETRIS_LIB) $(CLI_OBJ)
+	@$(CC) $(CFLAGS) $(CLI_OBJ) -o $(TETRIS_CLI) -L. -l:$(TETRIS_LIB) -lm -lncursesw
+	@rm -f $(CLI_OBJ)
+
+snake_cli: $(SNAKE_LIB) $(CLI_OBJ)
+	@$(CXX) $(CXXFLAGS) $(CLI_OBJ) -o $(SNAKE_CLI) -L. -l:$(SNAKE_LIB) -lm -lncursesw
+	@rm -f $(CLI_OBJ)
 
 dvi:
 	@latex -output-directory=build build/documentation.tex

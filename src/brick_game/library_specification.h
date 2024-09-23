@@ -1,8 +1,6 @@
 #ifndef LIBRARY_SPECIFICATION_H
 #define LIBRARY_SPECIFICATION_H
 
-#include <stdbool.h>
-
 #define FIELD_ROWS 20
 #define FIELD_COLS 10
 
@@ -33,8 +31,15 @@ typedef struct {
   int pause;
 } GameInfo_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void userInput(UserAction_t action, bool hold);
 GameInfo_t updateCurrentState();
-// void debug_log(const char *message);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // LIBRARY_SPECIFICATION_H

@@ -50,6 +50,7 @@
       ? 1000 - (tetris_info->game_info.speed - 1) * 250 \
       : 200 - (tetris_info->game_info.speed - 5) * 25
 
+#define HIGHSCORE_FILE "build/tetris.score"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -107,7 +108,7 @@ figure_t init_figure(type_t type);
 void process_signal(tetris_t *tetris_info);
 void update_game_info(tetris_t *tetris_info, type_t next_figure_type);
 
-void read_highscore(char *filename, int *highscore);
+int read_highscore(char *filename);
 void write_highscore(char *filename, int *highscore);
 
 typedef void (*action)(tetris_t *tetris_info);

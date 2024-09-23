@@ -219,3 +219,11 @@ void end_ncurses(WINDOW *brick_game_window) {
   wattroff(brick_game_window, COLOR_PAIR(DEFAULT));
   endwin();
 }
+
+void debug_log(const char *message) {
+  FILE *f = fopen("debug.log", "a");
+  if (f) {
+    fprintf(f, "%s\n", message);
+    fclose(f);
+  }
+}

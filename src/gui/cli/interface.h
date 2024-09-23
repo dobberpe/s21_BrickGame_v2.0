@@ -24,5 +24,6 @@ void print_field(WINDOW *brick_game_window, int **field);
 bool get_user_input(WINDOW *game_window, UserAction_t *user_action, bool pause);
 void print_result(WINDOW *brick_game_window, GameInfo_t *game_info);
 void end_ncurses(WINDOW *game_window);
+void debug_log(const char *message);
 
 #endif  // INTERFACE_H
