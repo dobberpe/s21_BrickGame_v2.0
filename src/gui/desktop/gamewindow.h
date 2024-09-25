@@ -6,6 +6,7 @@
 #include <QPainter>
 
 #include "controller.h"
+#include "../../brick_game/library_specification.h"
 
 namespace s21 {
 
@@ -24,7 +25,7 @@ namespace s21 {
 
       friend class Controller;
 
-      static const squareSize = 30;
+      static const int squareSize = 30;
   };
 }
 

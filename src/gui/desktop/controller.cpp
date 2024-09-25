@@ -7,7 +7,7 @@ s21::Controller *s21::Controller::get_controller(GameWindow *gw) {
 
 void s21::Controller::update_model() {
     GameInfo_t gameinfo = updateCurrentState();
-    gamewindow->updateInterface();
+    gamewindow->updateInterface(gameinfo);
 }
 
 s21::Controller::Controller(GameWindow *gw) : gamewindow(gw) {
