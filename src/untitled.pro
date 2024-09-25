@@ -13,12 +13,10 @@ CONFIG += c++17
 }
 
 SOURCES += \
-    gui/desktop/controller.cpp \
     gui/desktop/gamewindow.cpp \
     gui/desktop/main.cpp
 
 HEADERS += \
-    gui/desktop/controller.h \
     gui/desktop/gamewindow.h
 
 # Default rules for deployment.

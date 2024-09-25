@@ -75,8 +75,8 @@ void print_display(WINDOW *brick_game_window) {
   mvwprintw(brick_game_window, 30, 45, "←     - LEFT");
   mvwprintw(brick_game_window, 31, 45, "→     - RIGHT");
   mvwprintw(brick_game_window, 32, 45, "↓     - MOVE DOWN");
-  mvwprintw(brick_game_window, 33, 45, "↑     - PUT DOWN");
-  mvwprintw(brick_game_window, 34, 45, "SPACE - ROTATE");
+  mvwprintw(brick_game_window, 33, 45, "↑     - PUT DOWN / UP");
+  mvwprintw(brick_game_window, 34, 45, "SPACE - ROTATE / BOOST");
   mvwprintw(brick_game_window, 35, 45, "ESC   - QUIT");
 
   wrefresh(brick_game_window);

@@ -10,29 +10,7 @@
 
 namespace s21 {
 
-    class Controller : public QObject
-    {
-        Q_OBJECT
-    public:
-        Controller() = delete;
-        Controller(QObject *parent = nullptr) = delete;
-        Controller(const Controller&) = delete;
-        void operator =(const Controller&) = delete;
-        static Controller* get_controller(GameWindow *gw);
 
-    private slots:
-        void update_model();
-
-    private:
-        Controller(GameWindow *gw);
-        void process_user_input(int key_event, bool hold);
-
-        friend class GameWindow;
-
-        bool pause;
-        QTimer *updateTimer;
-        GameWindow* gamewindow;
-    };
 }
 
 #endif // CONTROLLER_H
