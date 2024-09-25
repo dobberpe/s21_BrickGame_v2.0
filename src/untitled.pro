@@ -5,9 +5,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++17
 
 !isEmpty(LIBRARY) {
-    LIBRARY_PATH = build/$$LIBRARY.a
+    LIBRARY_PATH = build/$${LIBRARY}.a
     LIBS += -L. -l:$$LIBRARY_PATH
-    TARGET = build/$$LIBRARY_dsk
+    TARGET = build/$${LIBRARY}_dsk
 } else {
     error("Please specify a library name using 'qmake LIBRARY=<name>'")
 }
@@ -25,3 +25,6 @@ HEADERS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+message("Library path: $$LIBRARY_PATH")
+message("Target: $$TARGET")
