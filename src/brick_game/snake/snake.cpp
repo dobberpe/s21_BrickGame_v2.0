@@ -2,8 +2,6 @@
 
 using namespace s21;
 
-Snake* Snake::snake_ptr = nullptr;
-
 void userInput(UserAction_t action, bool hold [[maybe_unused]]) {
 
 	if (action == Start) {
@@ -82,8 +80,8 @@ Snake::~Snake() {
 }
 
 Snake* Snake::get_snake_info() {
-	if (snake_ptr == nullptr) snake_ptr = new Snake;
-	return snake_ptr;
+  static Snake snake_info;
+  return &snake_info;
 }
 
 
@@ -97,7 +95,7 @@ void Snake::process_signal() {
 	action fsm_matrix[7][7] = {
 		{&Snake::exitstate, nullptr, nullptr, nullptr, nullptr, &Snake::spawn, nullptr},
 		{&Snake::spawn, &Snake::spawn, &Snake::spawn, &Snake::spawn, &Snake::spawn, &Snake::spawn, &Snake::spawn},
-		{&Snake::exitstate, &Snake::dir_left, &Snake::dir_right, &Snake::dir_up, &Snake::dir_down, &Snake::check_timer, &Snake::check_timer},
+		{&Snake::exitstate, &Snake::dir_left, &Snake::dir_right, &Snake::dir_up, &Snake::dir_down, &Snake::move, &Snake::check_timer},
 		{&Snake::move, &Snake::move, &Snake::move, &Snake::move, &Snake::move, &Snake::move, &Snake::move},
 		{&Snake::grow, &Snake::grow, &Snake::grow, &Snake::grow, &Snake::grow, &Snake::grow, &Snake::grow},
 		{&Snake::exitstate, &Snake::gameover, &Snake::gameover, &Snake::gameover, &Snake::gameover, &Snake::gameover, &Snake::gameover},

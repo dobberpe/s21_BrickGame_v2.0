@@ -6,7 +6,6 @@
 #include <chrono>
 #include <algorithm>
 #include <fstream>
-#include <string>
 #include "../library_specification.h"
 
 #define FALL_DELAY                                   \
@@ -60,7 +59,6 @@ namespace s21 {
 		void update_game_info();
 		GameInfo_t get_game_info() const;
 	private:
-		static Snake *snake_ptr;
 		deque<Coordinate> snake_body;
 		direction_t curr_dir;
 		direction_t new_dir;

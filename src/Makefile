@@ -57,6 +57,16 @@ snake_cli: $(SNAKE_LIB) $(CLI_OBJ)
 	@$(CXX) $(CXXFLAGS) $(CLI_OBJ) -o $(SNAKE_CLI) -L. -l:$(SNAKE_LIB) -lm -lncursesw
 	@rm -f $(CLI_OBJ)
 
+tetris_dsk: $(TETRIS_LIB)
+	@qmake -o Makefile.desktop LIBRARY=tetris
+	@make -f Makefile.desktop
+	@rm -f Makefile.desktop
+
+snake_dsk: $(SNAKE_LIB)
+	@qmake -o Makefile.desktop LIBRARY=snake
+	@make -f Makefile.desktop
+	@rm -f Makefile.desktop
+
 dvi:
 	@latex -output-directory=build build/documentation.tex
 
