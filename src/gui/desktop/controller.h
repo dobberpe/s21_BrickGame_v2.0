@@ -4,13 +4,9 @@
 #include <QObject>
 #include <QTimer>
 
-#include "gamewindow.h"
 #include "../../brick_game/library_specification.h"
+#include "gamewindow.h"
 
+namespace s21 {}
 
-namespace s21 {
-
-
-}
-
-#endif // CONTROLLER_H
+#endif  // CONTROLLER_H

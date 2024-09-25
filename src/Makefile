@@ -18,6 +18,8 @@ CLI_SRC = gui/cli/interface.c
 CLI_OBJ = $(CLI_SRC:.c=.o)
 TETRIS_CLI = build/tetris_cli
 SNAKE_CLI = build/snake_cli
+TETRIS_DSK = build/tetris_dsk
+SNAKE_DSK = build/snake_dsk
 
 DIST_NAME = brick_game.tar.gz
 TEST_SRC = $(wildcard ./tests/*.c)
@@ -26,10 +28,10 @@ TEST_OBJ = $(TEST_SRC:.c=.o)
 
 all: run
 
-install: tetris_cli snake_cli
+install: tetris_cli snake_cli tetris_dsk snake_dsk
 
 uninstall:
-	@rm -rf $(TETRIS_CLI) $(SNAKE_CLI)
+	@rm -f $(TETRIS_CLI) $(SNAKE_CLI) $(TETRIS_DSK) $(SNAKE_DSK)
 
 %.o: %.c
 	@$(CC) $(CFLAGS) -c $< -o $@
@@ -61,17 +63,19 @@ tetris_dsk: $(TETRIS_LIB)
 	@qmake -o Makefile.desktop LIBRARY=tetris
 	@make -f Makefile.desktop
 	@rm -f Makefile.desktop
+	@rm -f controller.o gamewindow.o main.o moc_*
 
 snake_dsk: $(SNAKE_LIB)
 	@qmake -o Makefile.desktop LIBRARY=snake
 	@make -f Makefile.desktop
 	@rm -f Makefile.desktop
+	@rm -f controller.o gamewindow.o main.o moc_*
 
 dvi:
 	@latex -output-directory=build build/documentation.tex
 
 dist: install
-	@tar -czvf $(DIST_NAME)  Makefile brick_game gui tests
+	@tar -czvf $(DIST_NAME) Makefile brick_game.pro brick_game gui tests build
 
 test: $(TEST_OBJ) $(TETRIS_LIB)
 	@$(CC) $(CFLAGS) $(TEST_OBJ) -o test -L. -l:$(TETRIS_LIB) $(TFLAGS)
@@ -101,7 +105,7 @@ leak_check:
 	@valgrind --tool=memcheck --leak-check=yes ./test
 
 clean: uninstall
-	@rm -f $(TETRIS_LIB) test gcov* coverage.info *.gcda *.gcno tests/*.gcno brick_game/tetris/*.gcda brick_game/tetris/*.gcno
+	@rm -f $(TETRIS_LIB) $(SNAKE_LIB) test gcov* coverage.info *.gcda *.gcno tests/*.gcno brick_game/tetris/*.gcda brick_game/tetris/*.gcno
 	@rm -rf coverage_report
 	@rm -rf .clang-format
 	@rm -rf $(DIST_NAME)

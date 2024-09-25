@@ -163,7 +163,10 @@ void process_signal(tetris_t *tetris_info) {
 
   if (act) act(tetris_info);
 
-  tetris_info->signal = NOSIG;
+  tetris_info->signal =
+      tetris_info->state == SPAWN || tetris_info->state == FALLING
+          ? tetris_info->signal
+          : NOSIG;
 }
 
 void spawn(tetris_t *tetris_info) {
@@ -266,7 +269,8 @@ void remove_line(tetris_t *tetris_info) {
                                   : line_counter == 4 ? 1500
                                                       : 0;
 
-  tetris_info->game_info.high_score = max(tetris_info->game_info.score, tetris_info->game_info.high_score);
+  tetris_info->game_info.high_score =
+      max(tetris_info->game_info.score, tetris_info->game_info.high_score);
 
   if (tetris_info->game_info.score < 6000) {
     tetris_info->game_info.level = tetris_info->game_info.score / 600 + 1;
