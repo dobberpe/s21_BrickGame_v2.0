@@ -61,7 +61,10 @@ Snake::Snake()
       state(START),
       signal(NOSIG),
       gen(rd()),
-      distrib(uniform_int_distribution<>(1, 199)) {
+      distrib(uniform_int_distribution<>(1, 196)) {
+  snake_body.push_front(Coordinate(8, 9));
+  snake_body.push_front(Coordinate(8, 8));
+  snake_body.push_front(Coordinate(8, 7));
   snake_body.push_front(Coordinate(7, 7));
 
   game_info.field = new int*[FIELD_ROWS];
