@@ -96,7 +96,7 @@ format_check:
 	@clang-format -n brick_game/*.* brick_game/*/* gui/*/* tests/*
 	@#cppcheck --enable=all --suppress=missingIncludeSystem brick_game/*.* brick_game/*/* gui/cli/* tests/*
 
-leak_check:
+leak_check: tests
 	@valgrind --tool=memcheck --leak-check=yes ./test
 
 clean:
