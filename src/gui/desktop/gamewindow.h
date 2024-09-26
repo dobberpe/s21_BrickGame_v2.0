@@ -23,7 +23,8 @@ class GameWindow : public QMainWindow {
   GameWindow(QWidget *parent = nullptr);
 
  protected:
-  void paintEvent(QPaintEvent *event);
+  void paintEvent(QPaintEvent *event) override;
+  void closeEvent(QCloseEvent *event) override;
 
  private:
   void keyPressEvent(QKeyEvent *event) override;

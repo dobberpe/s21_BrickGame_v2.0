@@ -26,9 +26,9 @@ TEST_SRC = $(wildcard ./tests/*.c)
 TEST_GCDA = $(TETRIS_SRC:.c=.gcda)
 TEST_OBJ = $(TEST_SRC:.c=.o)
 
-all: run
+all: install
 
-install: tetris_cli snake_cli tetris_dsk snake_dsk
+install: tetris_cli snake_cli tetris_dsk snake_dsk clean
 
 uninstall:
 	@rm -f $(TETRIS_CLI) $(SNAKE_CLI) $(TETRIS_DSK) $(SNAKE_DSK)
@@ -53,11 +53,9 @@ $(SNAKE_LIB): $(SNAKE_OBJ)
 
 tetris_cli: $(TETRIS_LIB) $(CLI_OBJ)
 	@$(CC) $(CFLAGS) $(CLI_OBJ) -o $(TETRIS_CLI) -L. -l:$(TETRIS_LIB) -lm -lncursesw
-	@rm -f $(CLI_OBJ)
 
 snake_cli: $(SNAKE_LIB) $(CLI_OBJ)
 	@$(CXX) $(CXXFLAGS) $(CLI_OBJ) -o $(SNAKE_CLI) -L. -l:$(SNAKE_LIB) -lm -lncursesw
-	@rm -f $(CLI_OBJ)
 
 tetris_dsk: $(TETRIS_LIB)
 	@qmake -o Makefile.desktop LIBRARY=tetris
@@ -89,9 +87,6 @@ gcov_report: clean add_coverage $(TETRIS_LIB)
 	@python3 -m gcovr -r . --html --html-details -o coverage_report/index.html --exclude test
 	@open coverage_report/index.html
 
-run: install
-	@./$(EXEC)
-
 fix_format:
 	@cp ../materials/linters/.clang-format .
 	@clang-format -i brick_game/*.* brick_game/*/* gui/*/* tests/*
@@ -104,14 +99,16 @@ format_check:
 leak_check:
 	@valgrind --tool=memcheck --leak-check=yes ./test
 
-clean: uninstall
-	@rm -f $(TETRIS_LIB) $(SNAKE_LIB) test gcov* coverage.info *.gcda *.gcno tests/*.gcno brick_game/tetris/*.gcda brick_game/tetris/*.gcno
+clean:
+	@rm -f $(CLI_OBJ) $(TETRIS_LIB) $(SNAKE_LIB) test gcov* coverage.info *.gcda *.gcno tests/*.gcno brick_game/tetris/*.gcda brick_game/tetris/*.gcno
 	@rm -rf coverage_report
 	@rm -rf .clang-format
 	@rm -rf $(DIST_NAME)
 
+clear: uninstall clean
+
 add_coverage:
 	$(eval CFLAGS:=$(CFLAGS) $(GFLAGS))
 
-re: clean all
+re: clear all
 

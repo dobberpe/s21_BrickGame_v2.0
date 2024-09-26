@@ -10,7 +10,7 @@ GameWindow::GameWindow(QWidget *parent) : QMainWindow(parent) {
   Controller::get_controller(this)->update_model();
 }
 
-void GameWindow::paintEvent(QPaintEvent *event) {
+void GameWindow::paintEvent(QPaintEvent *event [[maybe_unused]]) {
   QPainter painter(this);
 
   QFont font = painter.font();
@@ -64,8 +64,8 @@ void GameWindow::paintEvent(QPaintEvent *event) {
   painter.drawText(infoFieldX, y, QString("SPEED UP"));
   painter.drawText(
       infoFieldX + 125, y,
-      QString("%1").arg(
-          (game_info.speed < 10 ? ((game_info.score % 600) * 100) / 600 : 100),
+      QString("%1%").arg(
+          (game_info.speed < 10 ? ((game_info.score % 5) * 100) / 5 : 100),
           11, 10, QChar(' ')));
   y += 30;
 
@@ -111,6 +111,8 @@ void GameWindow::paintEvent(QPaintEvent *event) {
   painter.setPen(QColor(Qt::black));
 }
 
+void GameWindow::closeEvent(QCloseEvent *event [[maybe_unused]]) { Controller::get_controller(this)->process_user_input(Qt::Key_Escape, false); }
+
 void GameWindow::keyPressEvent(QKeyEvent *event) {
   Controller::get_controller(this)->process_user_input(event->key(),
                                                        event->isAutoRepeat());
@@ -153,7 +155,7 @@ void s21::Controller::process_user_input(
         update_model();
         updateTimer->stop();
       } else
-        updateTimer->start(100);
+        updateTimer->start(1);
       break;
     case Qt::Key_Escape:
       userInput(Terminate, hold);

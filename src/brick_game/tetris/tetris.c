@@ -280,11 +280,12 @@ void remove_line(tetris_t *tetris_info) {
 }
 
 void gameover(tetris_t *tetris_info) {
-  write_highscore(HIGHSCORE_FILE, &(tetris_info->game_info.high_score));
   tetris_info->game_info.pause = true;
 }
 
 void exitstate(tetris_t *tetris_info) {
+  write_highscore(HIGHSCORE_FILE, &(tetris_info->game_info.high_score));
+
   if (tetris_info->game_info.field) {
     for (int i = 0; i < FIELD_ROWS; ++i) free(tetris_info->game_info.field[i]);
     free(tetris_info->game_info.field);
