@@ -29,6 +29,12 @@ class GameWindow : public QMainWindow {
  private:
   void keyPressEvent(QKeyEvent *event) override;
   void set_gameinfo(GameInfo_t gi);
+  void set_painter(QPainter &painter) const;
+  void print_info(QPainter &painter, const int &x, const int &y,
+                  const int &width, const QString &label,
+                  bool left_align) const;
+  void print_field(QPainter &painter, const int &y, int **field,
+                   bool next) const;
 
   friend class Controller;
 

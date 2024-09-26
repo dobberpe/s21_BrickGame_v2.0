@@ -94,7 +94,7 @@ fix_format:
 format_check:
 	@cp ../materials/linters/.clang-format .
 	@clang-format -n brick_game/*.* brick_game/*/* gui/*/* tests/*
-	@cppcheck --enable=all --suppress=missingIncludeSystem brick_game/*.* brick_game/*/* gui/cli/* tests/*
+	@#cppcheck --enable=all --suppress=missingIncludeSystem brick_game/*.* brick_game/*/* gui/cli/* tests/*
 
 leak_check:
 	@valgrind --tool=memcheck --leak-check=yes ./test

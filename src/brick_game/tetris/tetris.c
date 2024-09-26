@@ -279,9 +279,7 @@ void remove_line(tetris_t *tetris_info) {
   tetris_info->state = SPAWN;
 }
 
-void gameover(tetris_t *tetris_info) {
-  tetris_info->game_info.pause = true;
-}
+void gameover(tetris_t *tetris_info) { tetris_info->game_info.pause = true; }
 
 void exitstate(tetris_t *tetris_info) {
   write_highscore(HIGHSCORE_FILE, &(tetris_info->game_info.high_score));

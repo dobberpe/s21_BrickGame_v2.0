@@ -13,105 +13,78 @@ GameWindow::GameWindow(QWidget *parent) : QMainWindow(parent) {
 void GameWindow::paintEvent(QPaintEvent *event [[maybe_unused]]) {
   QPainter painter(this);
 
-  QFont font = painter.font();
-  font.setPointSize(12);
-  painter.setFont(font);
-  painter.setPen(QColor(PAUSE_ACTIVE));
-
-  for (int i = 0; i < FIELD_ROWS; ++i)
-    for (int j = 0; j < FIELD_COLS; ++j) {
-      QRect square(j * squareSize, i * squareSize, squareSize, squareSize);
-      painter.setBrush(game_info.field[i][j] ? QColor(GREEN_ACTIVE)
-                                             : QColor(GREEN_BGR));
-      painter.drawRect(square);
-    }
+  set_painter(painter);
+  print_field(painter, 0, game_info.field, false);
 
   int infoFieldX = FIELD_COLS * squareSize + 15;
-  int y = 30;
 
-  painter.drawText(infoFieldX, y, QString("SCORE"));
-  painter.drawText(infoFieldX + 125, y,
-                   QString("%1").arg(game_info.score, 11, 10, QChar(' ')));
-  y += 30;
+  print_info(painter, infoFieldX, 12, 195, QString("SCORE"), true);
+  print_info(painter, infoFieldX, 12, 195, QString("%1").arg(game_info.score),
+             false);
 
-  painter.drawText(infoFieldX, y, QString("HIGHSCORE"));
-  painter.drawText(infoFieldX + 125, y,
-                   QString("%1").arg(game_info.high_score, 11, 10, QChar(' ')));
-  y += 60;
+  print_info(painter, infoFieldX, 42, 195, QString("HIGHSCORE"), true);
+  print_info(painter, infoFieldX, 42, 195,
+             QString("%1").arg(game_info.high_score), false);
 
-  painter.drawText(infoFieldX, y, QString("NEXT"));
-  y -= 30;
-  for (int i = 0; i < NEXT_ROWS; ++i)
-    for (int j = 0; j < NEXT_COLS; ++j) {
-      QRect square(FIELD_COLS * squareSize + 90 + j * squareSize,
-                   y + i * squareSize, squareSize, squareSize);
-      painter.setBrush(game_info.next[i][j] ? QColor(GREEN_ACTIVE)
-                                            : QColor(GREEN_BGR));
-      painter.drawRect(square);
-    }
-  y += 90;
+  print_info(painter, infoFieldX, 102, 195, QString("NEXT"), true);
+  print_field(painter, 102, game_info.next, true);
 
-  painter.drawText(infoFieldX, y, QString("LEVEL"));
-  painter.drawText(infoFieldX + 125, y,
-                   QString("%1").arg(game_info.level, 11, 10, QChar(' ')));
-  y += 30;
+  print_info(painter, infoFieldX, 162, 195, QString("LEVEL"), true);
+  print_info(painter, infoFieldX, 162, 195, QString("%1").arg(game_info.level),
+             false);
 
-  painter.drawText(infoFieldX, y, QString("SPEED"));
-  painter.drawText(infoFieldX + 125, y,
-                   QString("%1").arg(game_info.speed, 11, 10, QChar(' ')));
-  y += 30;
+  print_info(painter, infoFieldX, 192, 195, QString("SPEED"), true);
+  print_info(painter, infoFieldX, 192, 195, QString("%1").arg(game_info.speed),
+             false);
 
-  painter.drawText(infoFieldX, y, QString("SPEED UP"));
-  painter.drawText(
-      infoFieldX + 125, y,
-      QString("%1%").arg(
-          (game_info.speed < 10 ? ((game_info.score % 5) * 100) / 5 : 100),
-          11, 10, QChar(' ')));
-  y += 30;
+  print_info(painter, infoFieldX, 222, 195, QString("SPEED UP"), true);
+  print_info(painter, infoFieldX, 222, 195,
+             QString("%1%").arg(game_info.speed < 10
+                                    ? ((game_info.score % 5) * 100) / 5
+                                    : 100),
+             false);
 
-  painter.drawText(infoFieldX, y, QString("CONTROL:"));
-  y += 30;
+  print_info(painter, infoFieldX, 282, 195, QString("CONTROL:"), true);
 
   infoFieldX += 15;
-  painter.drawText(infoFieldX, y, QString("ENTER"));
-  painter.drawText(infoFieldX + 53, y, QString("- START / PAUSE"));
-  y += 30;
+  print_info(painter, infoFieldX, 312, 53, QString("ENTER"), true);
+  print_info(painter, infoFieldX + 53, 312, 150, QString("- START / PAUSE"),
+             true);
 
-  painter.drawText(infoFieldX, y, QString("←"));
-  painter.drawText(infoFieldX + 53, y, QString("- LEFT"));
-  y += 30;
+  print_info(painter, infoFieldX, 342, 53, QString("←"), true);
+  print_info(painter, infoFieldX + 53, 342, 150, QString("- LEFT"), true);
 
-  painter.drawText(infoFieldX, y, QString("→"));
-  painter.drawText(infoFieldX + 53, y, QString("- RIGHT"));
-  y += 30;
+  print_info(painter, infoFieldX, 372, 53, QString("→"), true);
+  print_info(painter, infoFieldX + 53, 372, 150, QString("-RIGHT"), true);
 
-  painter.drawText(infoFieldX, y, QString("↓"));
-  painter.drawText(infoFieldX + 53, y, QString("- MOVE DOWN"));
-  y += 30;
+  print_info(painter, infoFieldX, 402, 53, QString("↓"), true);
+  print_info(painter, infoFieldX + 53, 402, 150, QString("- MOVE DOWN"), true);
 
-  painter.drawText(infoFieldX, y, QString("↑"));
-  painter.drawText(infoFieldX + 53, y, QString("- PUT DOWN / UP"));
-  y += 30;
+  print_info(painter, infoFieldX, 432, 53, QString("↑"), true);
+  print_info(painter, infoFieldX + 53, 432, 150, QString("- PUT DOWN / UP"),
+             true);
 
-  painter.drawText(infoFieldX, y, QString("SPACE "));
-  painter.drawText(infoFieldX + 53, y, QString("- ROTATE / BOOST"));
-  y += 30;
+  print_info(painter, infoFieldX, 462, 53, QString("SPACE"), true);
+  print_info(painter, infoFieldX + 53, 462, 150, QString("- ROTATE / BOOST"),
+             true);
 
-  painter.drawText(infoFieldX, y, QString("ESC"));
-  painter.drawText(infoFieldX + 53, y, QString("- QUIT"));
-  y += 80;
+  print_info(painter, infoFieldX, 492, 53, QString("ESC"), true);
+  print_info(painter, infoFieldX + 53, 492, 150, QString("- QUIT"), true);
 
+  QFont font = painter.font();
   font.setPointSize(36);
   painter.setFont(font);
 
   painter.setPen(game_info.pause ? QColor(PAUSE_ACTIVE)
                                  : QColor(PAUSE_UNACTIVE));
-  painter.drawText(infoFieldX + 15, y, QString("PAUSE"));
+  painter.drawText(infoFieldX + 15, 572, QString("PAUSE"));
 
-  painter.setPen(QColor(Qt::black));
+  painter.setPen(QColor(PAUSE_ACTIVE));
 }
 
-void GameWindow::closeEvent(QCloseEvent *event [[maybe_unused]]) { Controller::get_controller(this)->process_user_input(Qt::Key_Escape, false); }
+void GameWindow::closeEvent(QCloseEvent *event [[maybe_unused]]) {
+  Controller::get_controller(this)->process_user_input(Qt::Key_Escape, false);
+}
 
 void GameWindow::keyPressEvent(QKeyEvent *event) {
   Controller::get_controller(this)->process_user_input(event->key(),
@@ -126,6 +99,33 @@ void GameWindow::set_gameinfo(GameInfo_t gi) {
   game_info.level = gi.level;
   game_info.speed = gi.speed;
   game_info.pause = gi.pause;
+}
+
+void GameWindow::set_painter(QPainter &painter) const {
+  QFont font = painter.font();
+  font.setPointSize(12);
+  painter.setFont(font);
+  painter.setPen(QColor(PAUSE_ACTIVE));
+}
+
+void GameWindow::print_info(QPainter &painter, const int &x, const int &y,
+                            const int &width, const QString &label,
+                            bool left_align) const {
+  QRect rect(x, y, width, squareSize);
+  painter.drawText(rect, left_align ? Qt::AlignLeft : Qt::AlignRight, label);
+}
+
+void GameWindow::print_field(QPainter &painter, const int &y, int **field,
+                             bool next) const {
+  for (int i = 0; i < (next ? NEXT_ROWS : FIELD_ROWS); ++i)
+    for (int j = 0; j < (next ? NEXT_COLS : FIELD_COLS); ++j) {
+      QRect square(next ? (FIELD_COLS * squareSize + 90 + j * squareSize)
+                        : (j * squareSize),
+                   next ? (y - 12 + i * squareSize) : (i * squareSize),
+                   squareSize, squareSize);
+      painter.setBrush(field[i][j] ? QColor(GREEN_ACTIVE) : QColor(GREEN_BGR));
+      painter.drawRect(square);
+    }
 }
 
 s21::Controller *s21::Controller::get_controller(GameWindow *gw) {

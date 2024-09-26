@@ -4,8 +4,7 @@
 
 using namespace s21;
 
-void userInput(UserAction_t action, bool hold [[maybe_unused]])
-{
+void userInput(UserAction_t action, bool hold [[maybe_unused]]) {
   if (action == Start) {
     if (Snake::get_snake_info()->get_state() != GAMEOVER)
       Snake::get_snake_info()->set_pause(false);
@@ -63,7 +62,6 @@ Snake::Snake()
       signal(NOSIG),
       gen(rd()),
       distrib(uniform_int_distribution<>(1, 199)) {
-  clear_log();
   snake_body.push_front(Coordinate(7, 7));
 
   game_info.field = new int*[FIELD_ROWS];
@@ -135,7 +133,9 @@ void Snake::process_signal() {
 
   if (act) (this->*act)();
 
-  signal = (state == SPAWN || state == MOVE || state == GROW) && signal != ENTER ? signal : NOSIG;
+  signal = (state == SPAWN || state == MOVE || state == GROW) && signal != ENTER
+               ? signal
+               : NOSIG;
 }
 
 void Snake::update_game_info() {
@@ -151,7 +151,6 @@ GameInfo_t Snake::get_game_info() const { return game_info; }
 
 void Snake::spawn() {
   int cell_number = distrib(gen);
-  debug_log("cell number " + to_string(cell_number));
 
   int i = -1, j = -1;
   while (cell_number && ++i < FIELD_ROWS) {
@@ -161,9 +160,6 @@ void Snake::spawn() {
           snake_body.end())
         --cell_number;
   }
-
-  for (const auto& chain : snake_body) debug_log("snake " + to_string(chain.y) + " " + to_string(chain.x));
-  debug_log("apple " + to_string(i) + " " + to_string(j));
 
   apple = Coordinate(j, i);
   state = ROTATE;
@@ -240,13 +236,9 @@ void Snake::grow() {
   }
 }
 
-void Snake::gameover() {
-  game_info.pause = true;
-}
+void Snake::gameover() { game_info.pause = true; }
 
-void Snake::exitstate() {
-  write_highscore();
-}
+void Snake::exitstate() { write_highscore(); }
 
 void Snake::read_highscore() {
   ifstream File(HIGHSCORE_FILE, ios::binary);
@@ -266,18 +258,4 @@ void Snake::write_highscore() const {
                sizeof(game_info.high_score));
     File.close();
   }
-}
-
-void Snake::debug_log(const string& message) {
-  ofstream file("debug.log", ios::app);
-
-  if (file) {
-    file << message << endl;
-    file.close();
-  }
-}
-
-void Snake::clear_log() {
-  ofstream file("debug.log", ofstream::out | ofstream::trunc);
-  if (file) file.close();
 }
