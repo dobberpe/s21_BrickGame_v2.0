@@ -3,7 +3,7 @@ CXX = g++
 
 CFLAGS = -Wall -Wextra -Werror -std=c11
 CXXFLAGS = -Wall -Wextra -Werror -std=c++17
-TFLAGS = -lcheck -lsubunit -lm
+TFLAGS = -lgtest -lsubunit
 GFLAGS = -fprofile-arcs -ftest-coverage
 
 TETRIS_SRC = brick_game/tetris/tetris.c
@@ -22,11 +22,11 @@ TETRIS_DSK = build/tetris_dsk
 SNAKE_DSK = build/snake_dsk
 
 DIST_NAME = brick_game.tar.gz
-TEST_SRC = $(wildcard ./tests/*.c)
-TEST_GCDA = $(TETRIS_SRC:.c=.gcda)
-TEST_OBJ = $(TEST_SRC:.c=.o)
+TEST_SRC = $(wildcard ./tests/*.cpp)
+TEST_GCDA = $(SNAKE_SRC:.cpp=.gcda)
+TEST_OBJ = $(TEST_SRC:.cpp=.o)
 
-all: install
+all: $(TETRIS_LIB) $(SNAKE_LIB)
 
 install: tetris_cli snake_cli tetris_dsk snake_dsk clean
 
@@ -53,21 +53,25 @@ $(SNAKE_LIB): $(SNAKE_OBJ)
 
 tetris_cli: $(TETRIS_LIB) $(CLI_OBJ)
 	@$(CC) $(CFLAGS) $(CLI_OBJ) -o $(TETRIS_CLI) -L. -l:$(TETRIS_LIB) -lm -lncursesw
+	@./$(TETRIS_CLI)
 
 snake_cli: $(SNAKE_LIB) $(CLI_OBJ)
 	@$(CXX) $(CXXFLAGS) $(CLI_OBJ) -o $(SNAKE_CLI) -L. -l:$(SNAKE_LIB) -lm -lncursesw
+	@./$(SNAKE_CLI)
 
 tetris_dsk: $(TETRIS_LIB)
 	@qmake -o Makefile.desktop LIBRARY=tetris
 	@make -f Makefile.desktop
 	@rm -f Makefile.desktop
 	@rm -f controller.o gamewindow.o main.o moc_*
+	@./$(TETRIS_DSK)
 
 snake_dsk: $(SNAKE_LIB)
 	@qmake -o Makefile.desktop LIBRARY=snake
 	@make -f Makefile.desktop
 	@rm -f Makefile.desktop
 	@rm -f controller.o gamewindow.o main.o moc_*
+	@./$(SNAKE_DSK)
 
 dvi:
 	@latex -output-directory=build build/documentation.tex
@@ -75,13 +79,13 @@ dvi:
 dist: install
 	@tar -czvf $(DIST_NAME) Makefile brick_game.pro brick_game gui tests build
 
-test: $(TEST_OBJ) $(TETRIS_LIB)
-	@$(CC) $(CFLAGS) $(TEST_OBJ) -o test -L. -l:$(TETRIS_LIB) $(TFLAGS)
+test: $(TEST_OBJ) $(SNAKE_LIB)
+	@$(CXX) $(CXXFLAGS) $(TEST_OBJ) -o test -L. -l:$(SNAKE_LIB) $(TFLAGS)
 	@rm -f $(TEST_OBJ)
 	@./test
 
-gcov_report: clean add_coverage $(TETRIS_LIB)
-	@$(CC) $(CFLAGS) -o gcov_r $(TEST_SRC) -L. -l:$(TETRIS_LIB) $(TFLAGS)
+gcov_report: clean add_coverage $(SNAKE_OBJ) $(SNAKE_LIB)
+	@$(CXX) $(CXXFLAGS) -o gcov_r $(TEST_SRC) -L. -l:$(SNAKE_LIB) $(TFLAGS)
 	@mkdir coverage_report
 	@./gcov_r
 	@python3 -m gcovr -r . --html --html-details -o coverage_report/index.html --exclude test
@@ -100,7 +104,7 @@ leak_check:
 	@valgrind --tool=memcheck --leak-check=yes ./test
 
 clean:
-	@rm -f $(CLI_OBJ) $(TETRIS_LIB) $(SNAKE_LIB) test gcov* coverage.info *.gcda *.gcno tests/*.gcno brick_game/tetris/*.gcda brick_game/tetris/*.gcno
+	@rm -f $(CLI_OBJ) $(TETRIS_LIB) $(SNAKE_LIB) test gcov* coverage.info *.gcda *.gcno tests/*.gcno brick_game/snake/*.gcda brick_game/snake/*.gcno
 	@rm -rf coverage_report
 	@rm -rf .clang-format
 	@rm -rf $(DIST_NAME)
@@ -108,7 +112,7 @@ clean:
 clear: uninstall clean
 
 add_coverage:
-	$(eval CFLAGS:=$(CFLAGS) $(GFLAGS))
+	$(eval CXXFLAGS:=$(CXXFLAGS) $(GFLAGS))
 
 re: clear all
 

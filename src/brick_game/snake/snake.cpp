@@ -152,6 +152,8 @@ void Snake::update_game_info() {
 
 GameInfo_t Snake::get_game_info() const { return game_info; }
 
+void Snake::set_apple(int x, int y) { apple = Coordinate(x, y); }
+
 void Snake::spawn() {
   int cell_number = distrib(gen);
 
@@ -164,7 +166,7 @@ void Snake::spawn() {
         --cell_number;
   }
 
-  apple = Coordinate(j, i);
+  set_apple(j, i);
   state = ROTATE;
 }
 
@@ -241,7 +243,10 @@ void Snake::grow() {
 
 void Snake::gameover() { game_info.pause = true; }
 
-void Snake::exitstate() { write_highscore(); }
+void Snake::exitstate() {
+  write_highscore();
+  state = EXIT;
+}
 
 void Snake::read_highscore() {
   ifstream File(HIGHSCORE_FILE, ios::binary);

@@ -50,6 +50,7 @@ class Snake {
   void process_signal();
   void update_game_info();
   GameInfo_t get_game_info() const;
+  void set_apple(int x, int y);
 
  private:
   deque<Coordinate> snake_body;
