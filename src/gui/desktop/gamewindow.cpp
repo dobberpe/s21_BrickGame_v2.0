@@ -144,6 +144,8 @@ s21::Controller::Controller(GameWindow *gw) : gamewindow(gw) {
   connect(updateTimer, &QTimer::timeout, this, &Controller::update_model);
 }
 
+Controller::~Controller() { delete updateTimer; }
+
 void s21::Controller::process_user_input(
     int key_event, bool hold) {  // update model after userInput
 

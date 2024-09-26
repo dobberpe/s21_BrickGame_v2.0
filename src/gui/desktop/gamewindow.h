@@ -50,15 +50,14 @@ class Controller : public QObject {
   Controller(const Controller &) = delete;
   void operator=(const Controller &) = delete;
   static Controller *get_controller(GameWindow *gw);
+  void process_user_input(int key_event, bool hold);
 
- private slots:
+ public slots:
   void update_model();
 
  private:
   Controller(GameWindow *gw);
-  void process_user_input(int key_event, bool hold);
-
-  friend class GameWindow;
+  ~Controller();
 
   bool pause;
   QTimer *updateTimer;
