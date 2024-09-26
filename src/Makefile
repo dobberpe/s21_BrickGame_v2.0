@@ -72,7 +72,7 @@ snake_dsk: $(SNAKE_LIB)
 dvi:
 	@latex -output-directory=build build/documentation.tex
 
-dist: install
+dist:
 	@tar -czvf $(DIST_NAME) Makefile brick_game.pro brick_game gui tests build
 
 tests: $(TEST_OBJ) $(SNAKE_LIB)
